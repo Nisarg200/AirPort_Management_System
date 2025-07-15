@@ -1,0 +1,270 @@
+Lab Group 1 
+Team ID - 110
+Topic - Airport Management System  
+
+SQL QUERIES
+
+[1] Retrieve all employees working in a department with the department code "DEL".
+
+SELECT EmpID, FlightNo, Airline_Name FROM 
+EmpAssignedTo AS e JOIN Flight AS f ON e.FlightNo = f.Flight_No
+WHERE Departure_Airport_Code = 'DEL';
+
+
+[2] Retrieve all the flight information for flights departing from Ahmedabad (AMD) and arriving at Delhi (DEL) on May 4, 2024?
+
+SELECT Flight_No, Airline_Name, Departure_Time, Reach_Time FROM Flight
+WHERE arrival_airport_Code= 'DEL' AND departure_airport_Code = 'AMD' AND Date(Departure_time) = '2024-05-04';
+
+[3] Find all flights operated by a specific airline.
+
+SELECT Flight_No, Airline_Name FROM Flight
+WHERE Airline_Name = 'SPICEJET';
+
+[4] Give information for flights departing on 4 May 2024 in ascending order of departure time.
+
+SELECT
+Flight_No, Airline_Name, Arrival_Airport_Code, Departure_Airport_Code,
+Departure_Time FROM Flight 
+WHERE DATE(Departure_time) = '2024-05-04'
+ORDER BY Departure_time ASC;
+
+[5] Get all transactions made using a specific payment method.
+
+SELECT * FROM Transaction
+WHERE PaymentMethod = 'Internet Banking';
+
+[6] List all employees along with their department name.
+
+SELECT Employee.Emp_ID, Employee.Name, Employee.DOB, Employee.Salary, Employee.GENDER, Department.Dept_Name
+FROM Employee
+INNER JOIN Department ON Employee.DeptNo = Department.Dept_No;
+
+[7] Retrieve all tickets issued along with the corresponding passenger and flight information.
+
+SELECT Ticket.Ticket_ID, Ticket.Price, Ticket.Date_Of_Issue, Ticket.TransactionID, Ticket.Flight_No, Ticket.PID,Passenger.Name AS Passenger_Name, Flight.Departure_Time, Flight.Reach_Time
+FROM Ticket
+INNER JOIN Passenger ON Ticket.PID = Passenger.PID
+INNER JOIN Flight ON Ticket.Flight_No = Flight.Flight_No;
+
+[8] What are the flight numbers along with their departure gate numbers and arrival gate numbers for flights departing from the 'AMD' airport on May 4, 2024?
+
+SELECT Flight_No, Departure_Gate_No, Arrival_Gate_No FROM Flight 
+WHERE Departure_Airport_Code = 'AMD' AND DATE(Departure_Time) = '2024-05-04';
+
+[9] List the passengers' IDs and names along with the total weight of their luggage, where the total weight of luggage for each passenger exceeds or equals 32 kilograms.
+
+SELECT Passenger.PID, Passenger.Name, SUM(Luggage.Weight) AS Total_Weight
+FROM Passenger
+LEFT JOIN Luggage ON Passenger.PID = Luggage.PID
+GROUP BY Passenger.PID, Passenger.Name
+HAVING SUM(Luggage.Weight) >= 32;
+
+[10] List all flights along with their departure and arrival airports' information.
+
+SELECT Flight_No, Departure_Airport_Code, DATE(Departure_Time), Arrival_Airport_Code, DATE(Reach_Time)
+FROM Flight;
+
+[11] Retrieve the average salary of employees in each department.
+
+SELECT Department.Dept_Name, CAST(AVG(Employee.Salary) AS INT) AS Avg_Salary
+FROM Department
+LEFT JOIN Employee ON Department.Dept_No = Employee.DeptNo
+GROUP BY Department.Dept_Name;
+
+[12] Find the total number of flights departing from each airport.
+
+SELECT Airport_Code, A.Airport_Name, COUNT(Flight.Flight_No) AS Total_Flights 
+FROM Flight
+INNER JOIN Airport AS A ON Flight.Departure_Airport_Code = A.Airport_Code
+GROUP BY A.Airport_Code, A.Airport_Name;
+
+[13] Find the number of tickets issued for each flight along with the total revenue generated.
+
+SELECT Ticket.Flight_No, COUNT(Ticket.Ticket_ID) AS Num_Tickets, 
+SUM(Ticket.Price) AS Total_Revenue
+FROM Ticket
+GROUP BY Ticket.Flight_No;
+
+[14] Find the busiest terminal in terms of the number of flights. 
+
+SELECT Terminal.Terminal_No, Terminal.Airport_Code, 
+COUNT(Flight.Flight_No) AS Num_Flights
+FROM Terminal
+INNER JOIN Flight ON Terminal.Terminal_No = Flight.Departure_Terminal_No AND Terminal.Airport_Code = Flight.Departure_Airport_Code
+GROUP BY Terminal.Terminal_No, Terminal.Airport_Code
+ORDER BY Num_Flights DESC
+LIMIT 1;
+
+[15] List the employees who are assigned to operate flights for a specific airline(Qatar Airways).
+
+SELECT E.Name, D.DEPT_NO, D.Dept_Name, A.Airline_Name FROM Employee AS E
+INNER JOIN EmpAssignedTo AS ET ON E.Emp_ID = ET.EmpID
+INNER JOIN Department AS D ON D.Dept_No=E.DeptNo
+INNER JOIN Airlines AS A ON E.Airline_Name = A.Airline_Name
+WHERE A.Airline_Name = 'Qatar Airways';
+
+[16] Find the average salary of male and female employees separately for a particular airport(‘DEL’).
+
+SELECT Gender, COUNT(Gender), CAST(AVG(Salary) AS INT) AS Avg_Salary
+FROM Employee WHERE Airport_Code = 'DEL'
+GROUP BY Gender;
+
+[17] List all  flight numbers along with the total luggage weight on each flight.
+
+SELECT DISTINCT flight.Flight_No, SUM(Luggage.Weight) AS Total_Luggage_Weight
+FROM Flight
+LEFT JOIN Ticket ON Flight.Flight_No = Ticket.Flight_No
+LEFT JOIN Passenger ON Ticket.PID = Passenger.PID
+LEFT JOIN Luggage ON Passenger.PID = Luggage.PID
+GROUP BY flight.Flight_No ,Luggage.Weight
+HAVING Luggage.Weight IS NOT NULL
+ORDER BY Total_Luggage_Weight DESC;
+
+[18] Display passengers have boarding passes for flights on May 21, 2024, along with the corresponding ticket IDs.
+
+SELECT P.Name, B.TID FROM Passenger AS P
+INNER JOIN Boarding_Pass AS B ON P.PID = B.PID
+WHERE DATE(B.BoardingTime)='2024-05-21';
+
+[19] Find the total revenue earned from ticket sales on a specific date:
+What is the total revenue generated from transactions made on April 7, 2024, considering the amounts recorded in the TRANSACTION table?
+
+SELECT SUM(TR.Amount) AS Total_Revenue
+FROM TRANSACTION AS TR
+WHERE TR.Date = '2024-04-07';
+
+[20] Retrieve the names and capacities of airlines along with the total number of flights operated by each airline.
+ 
+SELECT A.Airline_Name, F.Capacity, COUNT(F.Flight_No) AS Total_Flights
+FROM Airlines AS A
+LEFT JOIN Flight AS F ON A.Airline_Name = F.Airline_Name
+GROUP BY A.Airline_Name, F.Capacity;
+
+[21] List the flight numbers, airport code and departure times for flights departing from terminals of a specific type.
+
+SELECT F.Flight_No, T.Airport_Code, F.Departure_Time FROM Flight AS F
+INNER JOIN Terminal AS T ON F.Departure_Terminal_No = T.Terminal_No AND F.Departure_Airport_Code = T.Airport_Code
+WHERE T.Terminal_Type = 'International';
+
+[22] Find the number of flights departing from each city.
+
+SELECT A.CITY, COUNT(F.Flight_No) AS Num_Flights FROM Flight AS F
+INNER JOIN Airport AS A ON F.Departure_Airport_Code = A.Airport_Code
+GROUP BY A.CITY;
+
+[23] Find the airlines with the highest number of flights operated from a specific airport.
+
+SELECT A.Airline_Name, COUNT(F.Flight_No) AS Num_Flights FROM Airlines AS A
+INNER JOIN Flight AS F ON A.Airline_Name = F.Airline_Name
+WHERE F.Departure_Airport_Code = 'MAA'
+GROUP BY A.Airline_Name
+ORDER BY Num_Flights DESC
+LIMIT 1;
+
+[24] Find the total revenue generated from ticket sales for flights operated by each airline.
+
+SELECT A.Airline_Name, SUM(T.Price) AS Total_Revenue
+FROM Airlines AS A
+INNER JOIN Flight AS F ON A.Airline_Name = F.Airline_Name
+INNER JOIN Ticket AS T ON F.Flight_No = T.Flight_No
+GROUP BY A.Airline_Name;
+
+[25] Find the number of flights departing from each airport along with the average capacity of those flights.
+
+SELECT F.Departure_Airport_Code, COUNT(F.Flight_No) AS Num_Flights, CAST(AVG(F.Capacity) AS INT) AS Avg_Capacity
+FROM Flight AS F
+GROUP BY F.Departure_Airport_Code;
+
+[26] List all flights where the departure gate is the same as the arrival gate.
+
+SELECT f.Flight_No, f.Departure_Gate_No, f.Arrival_Gate_No
+FROM Flight f
+WHERE f.Departure_Gate_No = f.Arrival_Gate_No;
+
+[27] Retrieve the names of passengers who have not checked in for their flights.
+
+SELECT P.Name,P.pid
+FROM Passenger P
+LEFT JOIN Boarding_Pass B ON P.PID = B.PID
+WHERE B.ID IS NULL;
+
+[28] Find the busiest days for flight departures from each airport.
+
+SELECT F.Departure_Airport_Code, DATE(F.Departure_Time) AS Departure_Date, COUNT(F.Flight_No) AS Num_Flights
+FROM Flight AS F
+GROUP BY F.Departure_Airport_Code, Departure_Date
+ORDER BY Num_Flights DESC;
+
+[29] Retrieve the total revenue generated from ticket sales for each month of the year.
+
+SELECT EXTRACT(MONTH FROM T.Date_Of_Issue) AS Month, SUM(T.Price) AS Monthly_Revenue
+FROM Ticket AS T
+INNER JOIN Transaction AS Tr ON T.TransactionID = Tr.TransactionID
+GROUP BY EXTRACT(MONTH FROM T.Date_Of_Issue);
+
+[30] Retrieve the name , department , airline name of the employee with the highest salary.
+
+SELECT Name,DeptNo,Airline_name,Salary
+FROM Employee
+ORDER BY Salary DESC
+LIMIT 1;
+
+[31] Display the oldest employee.
+
+SELECT *,
+       DATE_PART('year', AGE(CURRENT_DATE, DOB)) AS Age
+FROM Employee  
+ORDER BY AGE(CURRENT_DATE, DOB) DESC 
+LIMIT 1;
+
+[32] What is the highest priced ticket sold?
+
+SELECT flight_no,airline_name, max(Price) AS Sales FROM Ticket natural join flight 
+GROUP BY Flight_No,ticket.price,airline_name
+ORDER BY ticket.price DESC LIMIT 1; 
+
+[33] List of all employees of a given airline name.
+
+SELECT * FROM Employee 
+WHERE Airline_Name= 'Emirates';
+
+[34] What are the top three airlines based on the total revenue generated from ticket sales across all flights?
+
+SELECT a.Airline_Name, SUM(t.Price) AS Total_Revenue
+FROM Airlines a
+JOIN Flight f ON a.Airline_Name = f.Airline_Name
+JOIN Ticket t ON f.Flight_No = t.Flight_No
+GROUP BY a.Airline_Name
+ORDER BY Total_Revenue DESC
+LIMIT 3;
+
+[35] What is the distribution of employees across departments at the airport with the airport code 'MAA'?
+
+SELECT d.Dept_Name, COUNT(e.Emp_ID)  AS Total_Employees
+FROM Department d
+LEFT JOIN Employee e ON d.Dept_No = e.DeptNo
+WHERE AIRPORT_CODE = 'MAA'
+GROUP BY d.Dept_Name
+ORDER BY Total_Employees DESC;
+
+[36] List average ticket prices for flights operated by each airline.
+
+SELECT a.Airline_Name, CAST(AVG(t.Price) AS INT) AS Avg_Ticket_Price
+FROM Airlines a
+JOIN Flight f ON a.Airline_Name = f.Airline_Name
+JOIN Ticket t ON f.Flight_No = t.Flight_No
+GROUP BY a.Airline_Name
+ORDER BY Avg_Ticket_Price DESC;
+
+[37] What is the total revenue generated from ticket sales for each airline operating at the airport with the airport code 'MAA'?
+
+SELECT a.Airline_Name, SUM(t.Price) AS Total_Revenue
+FROM Airlines a
+JOIN Flight f ON a.Airline_Name = f.Airline_Name
+JOIN Ticket t ON f.Flight_No = t.Flight_No
+JOIN Airport ar ON f.Departure_Airport_Code = ar.Airport_Code
+WHERE ar.Airport_Code = 'MAA'
+GROUP BY a.Airline_Name
+ORDER BY Total_Revenue DESC;
+

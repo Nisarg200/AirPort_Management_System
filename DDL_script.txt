@@ -1,0 +1,168 @@
+DDL SCRIPT
+
+Lab Group 1 
+Team ID - 110
+Topic - AIRPORT MANAGEMENT SYSTEM
+
+
+CREATE SCHEMA AIRPORT_MANAGEMENT_SYSTEM_1;
+SET SEARCH_PATH TO AIRPORT_MANAGEMENT_SYSTEM_1;
+
+CREATE TABLE Passenger (
+	PID VARCHAR NOT NULL,
+	AadharPassportNo BIGINT NOT NULL,
+	Name VARCHAR(30),
+	Address TEXT,
+	Email TEXT,
+	PRIMARY KEY (PID)
+);
+CREATE TABLE Passenger_Contact (
+	PID VARCHAR NOT NULL,
+	ContactNo BIGINT,
+	PRIMARY KEY (PID, ContactNo),
+	 FOREIGN KEY (PID) REFERENCES Passenger(PID)
+		ON UPDATE CASCADE ON DELETE CASCADE
+);
+CREATE TABLE Luggage (
+	LuggageID VARCHAR NOT NULL,
+	Weight DECIMAL(5,3),
+	PID VARCHAR,
+	PRIMARY KEY (LuggageID),
+	FOREIGN KEY (PID) REFERENCES Passenger(PID)
+		ON UPDATE CASCADE ON DELETE CASCADE
+);
+CREATE TABLE Airlines (
+ Airline_Name VARCHAR NOT NULL,
+ Airline_ID VARCHAR NOT NULL,
+ Email_ID TEXT,
+ Helpline_No BIGINT,
+ PRIMARY KEY(Airline_Name)
+);
+CREATE TABLE Airport(
+ Airport_Code VARCHAR NOT NULL,
+ Airport_Name VARCHAR NOT NuLL,
+ COUNTRY VARCHAR,
+ STATE VARCHAR,
+ CITY VARCHAR,
+ PRIMARY KEY(Airport_Code)
+);
+CREATE TABLE Terminal(
+ Terminal_No CHAR(2) NOT NULL,
+ Airport_Code VARCHAR NOT NULL,
+ Terminal_Type VARCHAR,
+ PRIMARY KEY(Terminal_No,Airport_Code),
+ FOREIGN KEY (Airport_Code) REFERENCES Airport(Airport_Code)
+	ON UPDATE CASCADE ON DELETE CASCADE 
+);
+CREATE TABLE Gate(
+ Gate_No INTEGER NOT NULL,
+ Terminal_No CHAR(2) NOT NULL,
+ Airport_Code VARCHAR NOT NULL,
+ PRIMARY KEY(Gate_No,Terminal_No,Airport_Code),
+ FOREIGN KEY (Terminal_No,Airport_Code) REFERENCES Terminal(Terminal_No,Airport_Code)
+	ON UPDATE CASCADE ON DELETE CASCADE 
+);
+CREATE TABLE Operates_for(
+ Airline_Name VARCHAR NOT NULL,
+ Airport_Code VARCHAR NOT NULL,
+ PRIMARY KEY(Airline_Name,Airport_Code),
+ FOREIGN KEY (Airport_Code) REFERENCES Airport(Airport_Code)
+	ON UPDATE CASCADE ON DELETE CASCADE,
+ FOREIGN KEY (Airline_Name) REFERENCES Airlines(Airline_Name)
+	ON UPDATE CASCADE ON DELETE CASCADE 
+);
+CREATE TABLE Department (
+ Dept_No VARCHAR(5) NOT NULL,
+ Dept_Name VARCHAR NOT NULL,
+ PRIMARY KEY(Dept_No)
+);
+CREATE TABLE Employee (
+ Emp_ID VARCHAR NOT NULL,
+ Name VARCHAR(30) NOT NULL,
+ DOB DATE,
+ Salary INTEGER,
+ GENDER CHAR,
+ Airline_Name VARCHAR,
+ DeptNo VARCHAR(5),
+ Airport_Code VARCHAR,
+ PRIMARY KEY (Emp_ID),
+ FOREIGN KEY (Airline_Name) REFERENCES Airlines(Airline_Name)
+	ON UPDATE CASCADE ON DELETE CASCADE,
+ FOREIGN KEY (DeptNo) REFERENCES Department(Dept_No)
+	ON UPDATE CASCADE ON DELETE CASCADE,
+ FOREIGN KEY (Airport_Code) REFERENCES Airport(Airport_Code)
+	ON UPDATE CASCADE ON DELETE CASCADE
+);
+CREATE TABLE EMP_Contact(
+ Contact_no BIGINT,
+ Emp_ID VARCHAR,
+ PRIMARY KEY(Emp_ID,Contact_no)
+);
+CREATE TABLE Flight (
+      Flight_No VARCHAR NOT NULL,
+      Airline_Name VARCHAR NOT NULL,
+      Capacity INTEGER,
+      Departure_Time TIMESTAMP,
+      Reach_Time TIMESTAMP,
+      Arrival_Airport_Code VARCHAR, 
+      Arrival_Terminal_No CHAR(2),
+      Arrival_Gate_No INTEGER,
+      Departure_Airport_Code VARCHAR,
+      Departure_Terminal_No CHAR(2),
+      Departure_Gate_No INTEGER,
+      PRIMARY KEY (Flight_No),
+      FOREIGN KEY (Airline_Name) REFERENCES Airlines(Airline_Name)
+      ON UPDATE CASCADE ON DELETE CASCADE,
+      FOREIGN KEY (Arrival_Gate_No,Arrival_Airport_Code,Arrival_Terminal_No) REFERENCES Gate(Gate_No,Airport_Code,Terminal_No)
+      ON UPDATE CASCADE ON DELETE CASCADE,
+     FOREIGN KEY (Departure_Gate_No,Departure_Airport_Code,Departure_Terminal_No) REFERENCES Gate(Gate_No,Airport_Code,Terminal_No)
+      ON UPDATE CASCADE ON DELETE CASCADE
+);
+CREATE TABLE EmpAssignedTo(
+ EmpID VARCHAR NOT NULL,
+ FLightNo VARCHAR NOT NULL,
+ PRIMARY KEY(EmpID,FLightNo),
+
+ FOREIGN KEY (EmpID) REFERENCES Employee(Emp_ID)
+	ON UPDATE CASCADE ON DELETE CASCADE,
+ FOREIGN KEY (FLightNo) REFERENCES Flight(FLight_No)
+	ON UPDATE CASCADE ON DELETE CASCADE 
+ 
+);
+CREATE TABLE Transaction (
+	TransactionID CHAR(8) NOT NULL,
+	Date DATE,
+	PaymentMethod VARCHAR,
+	Amount DECIMAL(6,2),
+	PRIMARY KEY (TransactionID)
+);
+CREATE TABLE Ticket (
+	Ticket_ID VARCHAR NOT NULL,
+	Price DECIMAL(6,2),
+	Date_Of_Issue TIMESTAMP,
+	TransactionID CHAR(8),
+	Flight_No VARCHAR,
+	PID VARCHAR,
+	PRIMARY KEY (Ticket_ID),
+	 FOREIGN KEY (TransactionID) REFERENCES Transaction(TransactionID)
+		ON UPDATE CASCADE ON DELETE CASCADE,
+	 FOREIGN KEY (Flight_No) REFERENCES Flight(Flight_No)
+		ON UPDATE CASCADE ON DELETE CASCADE,
+	 FOREIGN KEY (PID) REFERENCES Passenger(PID)
+		ON UPDATE CASCADE ON DELETE CASCADE
+);
+CREATE TABLE Boarding_Pass (
+	ID VARCHAR(10) NOT NULL,
+	GateNo INTEGER,
+	BoardingTime TIMESTAMP,
+	CheckInTime TIMESTAMP,
+	TID VARCHAR,
+	PID VARCHAR,
+	SeatNo VARCHAR,
+	Class VARCHAR,
+	PRIMARY KEY (ID),
+	 FOREIGN KEY (TID) REFERENCES Ticket(Ticket_ID)
+		ON UPDATE CASCADE ON DELETE CASCADE,
+	 FOREIGN KEY (PID) REFERENCES Passenger(PID)
+		ON UPDATE CASCADE ON DELETE CASCADE
+);
